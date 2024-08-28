@@ -46,11 +46,12 @@ def binary_search(cnf):
 # Random DIMACS Generator
 
 def generate_random_dimacs(num_vars, num_clauses, file_path):
-    with open(file_path, 'w') as f:
-        f.write(f"p cnf {num_vars} {num_clauses}\n")
-        for _ in range(num_clauses):
-            clause = [random.choice([i, -i]) for i in random.sample(range(1, num_vars + 1), random.randint(1, num_vars))]
-            f.write(" ".join(map(str, clause)) + " 0\n")
+    print("random disabled")
+    # with open(file_path, 'w') as f:
+    #     f.write(f"p cnf {num_vars} {num_clauses}\n")
+    #     for _ in range(num_clauses):
+    #         clause = [random.choice([i, -i]) for i in random.sample(range(1, num_vars + 1), random.randint(1, num_vars))]
+    #         f.write(" ".join(map(str, clause)) + " 0\n")
 
 # Test Environment with Visualizations and Statistics
 
@@ -107,8 +108,8 @@ def test_environment(num_vars, num_clauses, iterations=5):
     plt.show()
 
 if __name__ == "__main__":
-    num_vars = 20
-    num_clauses = 50
+    num_vars = 3
+    num_clauses = 5
     iterations = 5
     
     test_environment(num_vars, num_clauses, iterations)
