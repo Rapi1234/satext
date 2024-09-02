@@ -247,7 +247,7 @@ def test_environment(num_vars, num_clauses, iterations=5):
     plt.ylabel("Runtime (seconds)")
     plt.legend()
     plt.grid(True)
-    plt.savefig("comparision_uuf75-325.png")
+    plt.savefig("comparison.png")
 
 ############################################
 #               Main method                #
@@ -256,6 +256,6 @@ def test_environment(num_vars, num_clauses, iterations=5):
 if __name__ == "__main__":
     num_vars = 25
     num_clauses = 100
-    iterations = 1
+    iterations = 100
     
     test_environment(num_vars, num_clauses, iterations)
