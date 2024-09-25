@@ -10,7 +10,7 @@ from pysat.card import CardEnc, EncType
 from pysat.examples.rc2 import RC2
 
 gen_random_dimacs = True # Might want to be deactivated for testing
-read_test_data = False
+read_test_data = True
 
 def check_satisfiability(cnf):
     with Minisat22(bootstrap_with=cnf) as solver:
@@ -58,11 +58,9 @@ def add_clause_satisfaction_indicators(cnf):
 
         # Extend the clause s.t. the clause is sat iff the indicator is set to true
         # (use: x <-> y   <==>   (not x or y) and (x or not y)) 
-        negated_clause = [-lit for lit in clause]
-        c1 = negated_clause + [indicator]
-        c2 = clause + [-indicator]
-        new_clauses.append(c1)
-        new_clauses.append(c2)
+        new_clauses.append(clause + [-indicator])
+        for lit in clause:
+            new_clauses. append([-lit, indicator])
     
     return new_clauses, indicators
 
@@ -87,9 +85,10 @@ def apply_cardinality_constraint(cnf, bound):
 ############################################
 
 def linear_search_unsat_to_sat(cnf):
+    model = None
     # To speed up the solver I tried to check for satisfiability first since then the cost are trivially zero
     if check_satisfiability(cnf):
-            return (None, 0)
+            return (model, 0)
     
     for k in range(len(cnf.clauses), -1, -1):
         # Apply cardinality constraint to ensure at least `k` clauses are satisfied
@@ -100,13 +99,13 @@ def linear_search_unsat_to_sat(cnf):
                 model = solver.get_model()
                 return model, len(cnf.clauses) - k
             
-    return None, 0
+    return model, 0
 
 def linear_search_sat_to_unsat(cnf):
     model = None
     # To speed up the solver I tried to check for satisfiability first since then the cost are trivially zero
     if check_satisfiability(cnf):
-            return (None, 0)
+            return (model, 0)
     
     for k in range(0, len(cnf.clauses) + 1):
         # Apply cardinality constraint to ensure at least `k` clauses are satisfied
@@ -125,7 +124,7 @@ def binary_search(cnf):
     model = None
     # To speed up the solver I tried to check for satisfiability first since then the cost are trivially zero
     if check_satisfiability(cnf):
-            return (None, 0)
+            return (model, 0)
         
     # Otherwise I continue until I find the maximum value of satifiable soft clauses
     while low <= high:
