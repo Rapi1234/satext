@@ -3,13 +3,14 @@ import random
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import argparse
 from pysat.formula import CNF
 from pysat.solvers import Minisat22
 from pysat.card import CardEnc, EncType
 from pysat.examples.rc2 import RC2
 
-gen_random_dimacs = False # Might want to be deactivated for testing
-read_test_data = True
+gen_random_dimacs = True # Might want to be deactivated for testing
+read_test_data = False
 
 def check_satisfiability(cnf):
     with Minisat22(bootstrap_with=cnf) as solver:
@@ -45,7 +46,7 @@ def get_ith_cnf(folder_name, i):
 # clause C (l_1 and l_2 ... and l_j and i_1) and additionaly for each literal a new clause
 # is created in the following way:
 # Then a constraint is added s.t. the indicator is only ture iff the clause is true. This
-# way it is possible to tell the solver which clauses must be fulfilled
+# way it is possible to tell the solver which clauses must be fulfilled.
 def add_clause_satisfaction_indicators(cnf):
     indicators = []
     new_clauses = CNF()
@@ -71,7 +72,6 @@ def add_clause_satisfaction_indicators(cnf):
 # been satisfied.  
 # cnf      - The original formula to be evaluated
 # bound    - The upper or lower bound
-# at_least - To choose between an upper or lower boound (True for lower, False for upper)
 def apply_cardinality_constraint(cnf, bound):
     # Add clause satisfaction indicators
     cnf_with_indicators, indicators = add_clause_satisfaction_indicators(cnf)
@@ -229,10 +229,10 @@ def test_environment(num_vars, num_clauses, iterations=5):
         if cost_bs != cost_rc2:
             print("Error! did not find correct solution with binary search!")
     
-    # Convert results to DataFrame
+    # Convert results to df
     df = pd.DataFrame(results)
     
-    # Display basic statistics
+    # Display runtime statistics
     print("\nRuntime Statistics:")
     print(df.groupby("Method")["Runtime (s)"].describe())
     print(f'\n{satisfiable_formula_cnt} of {iterations} formulas where satisfiable')
@@ -251,12 +251,80 @@ def test_environment(num_vars, num_clauses, iterations=5):
     plt.savefig("comparison.png")
 
 ############################################
+#          Function for running            #
+#             individual files             #
+############################################
+
+def solve_maxSat(file_path, method):
+    if not os.path.isfile(file_path):
+        print(f"Error: {file_path} is not a valid file.")
+        return
+    
+    cnf = CNF(from_file=file_path)
+
+    results = {"Method": [], "Runtime (s)": [], "Costs" :[]}
+    if method == 0: # Linear Search UNSAT to SAT
+        start_time = time.time()
+        (model_ls_u2s, cost) = linear_search_unsat_to_sat(cnf)
+        runtime = time.time() - start_time
+    elif method == 1: # Linear Search SAT to UNSAT
+        start_time = time.time()
+        (model_ls_s2u, cost) = linear_search_sat_to_unsat(cnf)
+        runtime = time.time() - start_time
+    elif method == 2: # Binary Search
+        start_time = time.time()
+        (model_bs, cost) = binary_search(cnf)
+        runtime = time.time() - start_time
+    # Store result
+    results["Method"].append("Linear Search UNSAT to SAT")
+    results["Runtime (s)"].append(runtime)
+    results["Costs"].append(cost)
+
+    start_time = time.time()
+    (model_rc2, cost_rc2) = validation_rc2(cnf)
+    runtime = time.time() - start_time
+    results["Method"].append("RC2")
+    results["Runtime (s)"].append(runtime)
+    results["Costs"].append(cost_rc2)
+
+    print(pd.DataFrame(results))
+
+############################################
 #               Main method                #
 ############################################
 
 if __name__ == "__main__":
-    num_vars = 25
-    num_clauses = 100
-    iterations = 100
-    
-    test_environment(num_vars, num_clauses, iterations)
+    # Create an argument parser to explain the usage
+    parser = argparse.ArgumentParser(
+        description='Solve a MaxSAT problem from a CNF file or run a test environment.',
+        epilog='If no file path is provided, the script will run the test enviornment.'
+    )
+
+    # Add an optional argument for the file path
+    parser.add_argument(
+        'file_path', 
+        nargs='?',  # Optional argument, '?' means it's optional (0 or 1 value)
+        help='Path to a CNF file to solve the MaxSAT problem.'
+    )
+     # Add an optional argument for the MaxSAT solving method
+    parser.add_argument(
+        '--method', '-m',
+        type=int,
+        choices=[0, 1, 2],
+        default=0,
+        help='Specify the MaxSAT solving method: 0 = linear UNSAT to SAT, 1 = linear SAT to UNSAT, 2 = binary search.'
+    )
+
+    args = parser.parse_args()
+
+     # If a file path is provided, call the solve_maxSat
+    if args.file_path:
+        solve_maxSat(args.file_path, args.method)
+    else: # If no file path is provided, prompt the user for input
+        try:
+            num_vars = int(input("Enter the number of variables: ")) # 25
+            num_clauses = int(input("Enter the number of clauses: ")) # 100 
+            iterations = int(input("Enter the number of iterations (max_k): ")) # 100
+            test_environment(num_vars, num_clauses, iterations)
+        except ValueError:
+            print("Please enter valid integer values for number of variables, clauses, and iterations.")
