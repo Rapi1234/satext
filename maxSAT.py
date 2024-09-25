@@ -40,11 +40,12 @@ def get_ith_cnf(folder_name, i):
 
 # This method introduces an indicator variable for each clause that is true if and only if
 # the clause is satisfied.
-# This is done my adding a new literal 'indicator' to the clause C = (l_1 and l_2 ... and 
-# l_j) (note that thie indiator must be nunique). This indicator is conjungated with the 
+# This is done by adding a new literal 'indicator' to the clause C = (l_1 and l_2 ... and 
+# l_j) (note that thie indiator must be unique). This indicator is conjungated with the 
 # clause C (l_1 and l_2 ... and l_j and i_1) and additionaly for each literal a new clause
 # is created in the following way:
-# AND_{l in C} (not i_1 and l_i) ... for all literals in the clause add such a clause
+# Then a constraint is added s.t. the indicator is only ture iff the clause is true. This
+# way it is possible to tell the solver which clauses must be fulfilled
 def add_clause_satisfaction_indicators(cnf):
     indicators = []
     new_clauses = CNF()
