@@ -42,15 +42,13 @@ Since the linear search sat to unsat is extremly large compared to others, I als
 
 The output is given next:
 ```
-uuf75-325 without sat2unsat
-
 Runtime Statistics:
                             count       mean       std        min        25%        50%        75%        max
-Method                                                                                                       
-Binary Search               100.0   0.826595  0.509808   0.396945   0.532988   0.643181   0.923771   4.098735
-Linear Search SAT to UNSAT  100.0  38.391988  2.564815  32.732038  36.821270  38.393613  40.370913  48.084874
-Linear Search UNSAT to SAT  100.0   0.088561  0.273392   0.011622   0.021904   0.034318   0.065464   2.628341
-RC2                         100.0   0.022646  0.041704   0.002813   0.005854   0.009529   0.021461   0.272438
+Method
+Binary Search               100.0   1.007445  0.563428   0.411773   0.630405   0.871484   1.142933   3.098846
+Linear Search SAT to UNSAT  100.0  41.385016  4.486095  34.693433  38.130008  40.813770  43.545779  58.885194
+Linear Search UNSAT to SAT  100.0   0.110980  0.252286   0.013358   0.027040   0.047493   0.081817   1.946944
+RC2                         100.0   0.033634  0.058430   0.004137   0.009207   0.014691   0.035384   0.370306
 
 0 of 100 formulas where satisfiable
 ```
